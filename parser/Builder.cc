@@ -1541,8 +1541,9 @@ public:
         if (collapseStringParts(parts)) {
             // only 1 child: String
             auto firstPart = parts.front().get();
+
             if (auto *s = parser::cast_node<String>(firstPart)) {
-                return make_unique<Symbol>(s->loc, s->val);
+                return make_unique<Symbol>(core::LocOffsets { static_cast<uint32_t>(begin->start()), static_cast<uint32_t>(end->end()) }, s->val);
             } else {
                 return nullptr;
             }

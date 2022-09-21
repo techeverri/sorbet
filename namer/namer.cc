@@ -1498,7 +1498,7 @@ public:
             state.definedClasses.emplace_back(insertClass(ctx.withOwner(getOwnerSymbol(klass.owner)), klass));
         }
 
-        for (auto ref : foundDefs.nonDeletableDefinitions()) {
+        for (auto ref : foundDefs.deletableDefinitions()) {
             switch (ref.kind()) {
                 case core::FoundDefinitionRef::Kind::StaticField: {
                     const auto &staticField = ref.staticField(foundDefs);

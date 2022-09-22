@@ -2202,6 +2202,15 @@ vector<SymbolFinderResult> findSymbols(const core::GlobalState &gs, vector<ast::
 
 void populateFoundDefHashes(core::Context ctx, core::FoundDefinitions &foundDefs,
                             core::FoundDefHashes &foundHashesOut) {
+    ENFORCE(foundHashesOut.staticFieldHashes.empty());
+    foundHashesOut.staticFieldHashes.reserve(foundDefs.fields().size());
+    for (const auto &staticField : foundDefs.staticFields()) {
+        auto owner = staticField.owner;
+        auto scopeClass = staticField.scopeClass;
+        auto fullNameHash = core::FullNameHash(ctx, staticField.name);
+        foundHashesOut.staticFieldHashes.emplace_back(owner.idx(), scopeClass.idx(), fullNameHash);
+    }
+
     ENFORCE(foundHashesOut.typeMemberHashes.empty());
     foundHashesOut.typeMemberHashes.reserve(foundDefs.fields().size());
     for (const auto &typeMember : foundDefs.typeMembers()) {

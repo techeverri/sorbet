@@ -93,6 +93,15 @@ void FullNameHash::sortAndDedupe(std::vector<core::FullNameHash> &hashes) {
     hashes.resize(std::distance(hashes.begin(), std::unique(hashes.begin(), hashes.end())));
 }
 
+void FoundStaticFieldHash::sanityCheck() const {
+    ENFORCE(nameHash.isDefined());
+}
+
+string FoundStaticFieldHash::toString() const {
+    return fmt::format("FoundStaticFieldHash {{ owner = {}, scopeClass = {}, nameHash = {} }}", owner, scopeClass,
+                       nameHash._hashValue);
+}
+
 void FoundTypeMemberHash::sanityCheck() const {
     ENFORCE(nameHash.isDefined());
 }

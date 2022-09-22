@@ -2202,16 +2202,25 @@ vector<SymbolFinderResult> findSymbols(const core::GlobalState &gs, vector<ast::
 
 void populateFoundDefHashes(core::Context ctx, core::FoundDefinitions &foundDefs,
                             core::FoundDefHashes &foundHashesOut) {
+    ENFORCE(foundHashesOut.typeMemberHashes.empty());
+    foundHashesOut.typeMemberHashes.reserve(foundDefs.fields().size());
+    for (const auto &typeMember : foundDefs.typeMembers()) {
+        auto owner = typeMember.owner;
+        auto fullNameHash = core::FullNameHash(ctx, typeMember.name);
+        foundHashesOut.typeMemberHashes.emplace_back(owner.idx(), typeMember.isTypeTemplate, fullNameHash);
+    }
+
     ENFORCE(foundHashesOut.methodHashes.empty());
-    ENFORCE(foundHashesOut.fieldHashes.empty());
     foundHashesOut.methodHashes.reserve(foundDefs.methods().size());
-    foundHashesOut.fieldHashes.reserve(foundDefs.fields().size());
     for (const auto &method : foundDefs.methods()) {
         auto owner = method.owner;
         auto fullNameHash = core::FullNameHash(ctx, method.name);
         foundHashesOut.methodHashes.emplace_back(owner.idx(), method.flags.isSelfMethod, fullNameHash,
                                                  method.arityHash);
     }
+
+    ENFORCE(foundHashesOut.fieldHashes.empty());
+    foundHashesOut.fieldHashes.reserve(foundDefs.fields().size());
     for (const auto &field : foundDefs.fields()) {
         auto owner = field.owner;
         auto fullNameHash = core::FullNameHash(ctx, field.name);

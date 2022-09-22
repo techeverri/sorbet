@@ -93,6 +93,15 @@ void FullNameHash::sortAndDedupe(std::vector<core::FullNameHash> &hashes) {
     hashes.resize(std::distance(hashes.begin(), std::unique(hashes.begin(), hashes.end())));
 }
 
+void FoundTypeMemberHash::sanityCheck() const {
+    ENFORCE(nameHash.isDefined());
+}
+
+string FoundTypeMemberHash::toString() const {
+    return fmt::format("FoundTypeMemberHash {{ owner.idx = {}, owner.isTypeTemplate = {}, nameHash = {} }}", owner.idx,
+                       owner.isTypeTemplate, nameHash._hashValue);
+}
+
 void FoundMethodHash::sanityCheck() const {
     ENFORCE(nameHash.isDefined());
 }

@@ -86,6 +86,32 @@ struct SymbolHash {
     }
 };
 
+struct FoundTypeMemberHash {
+    struct {
+        // The owner of this type member (index into namer's definedClasses vector)
+        uint32_t idx : 31;
+
+        // If this is true, then the actual owner is the singleton class of the class pointed to by `idx`
+        bool isTypeTemplate : 1;
+    } owner;
+
+    // Hash of this type member's name
+    const FullNameHash nameHash;
+
+    FoundTypeMemberHash(uint32_t ownerIdx, bool isTypeTemplate, FullNameHash nameHash)
+        : owner({ownerIdx, isTypeTemplate}), nameHash(nameHash) {
+        sanityCheck();
+    }
+
+    void sanityCheck() const;
+
+    // Debug string
+    std::string toString() const;
+};
+CheckSize(FoundTypeMemberHash, 8, 4);
+
+using FoundTypeMemberHashes = std::vector<FoundTypeMemberHash>;
+
 // A fingerprint of a FoundDefinition suitable for storing on a File.
 // Allows a current Namer run to reference information about a previous Namer run.
 struct FoundMethodHash {
@@ -149,6 +175,7 @@ CheckSize(FoundFieldHash, 8, 4);
 using FoundFieldHashes = std::vector<FoundFieldHash>;
 
 struct FoundDefHashes {
+    FoundTypeMemberHashes typeMemberHashes;
     FoundMethodHashes methodHashes;
     FoundFieldHashes fieldHashes;
 };

@@ -86,6 +86,29 @@ struct SymbolHash {
     }
 };
 
+struct FoundStaticFieldHash {
+    // The owner of this static field (index into namer's definedClasses vector)
+    uint32_t owner;
+    // The scopeClass of the constant in the LHS of the Assign that initialized this static field
+    // (index in to namer's definedClasses vector)
+    uint32_t scopeClass;
+    // Hash of this static field's name
+    const FullNameHash nameHash;
+
+    FoundStaticFieldHash(uint32_t owner, uint32_t scopeClass, FullNameHash nameHash)
+        : owner(owner), scopeClass(scopeClass), nameHash(nameHash) {
+        sanityCheck();
+    }
+
+    void sanityCheck() const;
+
+    // Debug string
+    std::string toString() const;
+};
+CheckSize(FoundStaticFieldHash, 12, 4);
+
+using FoundStaticFieldHashes = std::vector<FoundStaticFieldHash>;
+
 struct FoundTypeMemberHash {
     struct {
         // The owner of this type member (index into namer's definedClasses vector)
@@ -175,6 +198,7 @@ CheckSize(FoundFieldHash, 8, 4);
 using FoundFieldHashes = std::vector<FoundFieldHash>;
 
 struct FoundDefHashes {
+    FoundStaticFieldHashes staticFieldHashes;
     FoundTypeMemberHashes typeMemberHashes;
     FoundMethodHashes methodHashes;
     FoundFieldHashes fieldHashes;

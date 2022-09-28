@@ -2281,9 +2281,16 @@ uint32_t ClassOrModule::hash(const GlobalState &gs) const {
                 continue;
             }
 
-            if (e.second.isFieldOrStaticField() && e.second.asFieldRef().data(gs)->flags.isField &&
-                gs.lspExperimentalFastPathEnabled) {
-                continue;
+            if (gs.lspExperimentalFastPathEnabled && e.second.isFieldOrStaticField()) {
+                const auto &field = e.second.asFieldRef().data(gs);
+                if (field->flags.isStaticField && !field->isClassAlias()) {
+                    continue;
+                } else if (field->flags.isField) {
+                    continue;
+                } else {
+                    // Currently only static field class aliases must take the slow path
+                    ENFORCE(field->flags.isStaticField && field->isClassAlias());
+                }
             }
 
             if (e.second.isClassOrModule() && e.second.asClassOrModuleRef().data(gs)->ignoreInHashing(gs)) {

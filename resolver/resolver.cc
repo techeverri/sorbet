@@ -4081,11 +4081,18 @@ void verifyLinearizationComputed(const core::GlobalState &gs) {
 template <typename StateType>
 ast::ParsedFilesOrCancelled runIncrementalImpl(StateType &gs, vector<ast::ParsedFile> trees) {
     static_assert(is_same_v<remove_const_t<StateType>, core::GlobalState>);
+    constexpr bool isMutableStateType = !is_const_v<StateType>;
 
     auto workers = WorkerPool::create(0, gs.tracer());
     trees = ResolveConstantsWalk::resolveConstants(gs, std::move(trees), *workers);
     // NOTE: Linearization does not need to be recomputed as we do not mutate mixins() during incremental resolve.
+    // (verifyLinearizationComputed vs finalizeAncestors is currently the only difference between
+    // `run` and `runIncremental`. If we ever change the fast path in a way that needs linearization
+    // to be recomputed, we can simply make `runIncremental` be `run`.)
     verifyLinearizationComputed(gs);
+    if constexpr (isMutableStateType) {
+        Resolver::finalizeSymbols(gs);
+    }
     auto rtmafResult = ResolveTypeMembersAndFieldsWalk::run(gs, std::move(trees), *workers);
     auto result = resolveSigs(gs, std::move(rtmafResult.trees), *workers);
     ResolveTypeMembersAndFieldsWalk::resolvePendingCastItems(gs, rtmafResult.todoResolveCastItems);

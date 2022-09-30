@@ -1466,6 +1466,10 @@ private:
         auto ownerSymbol = getOwnerSymbol(ownerRef);
         auto owner = ownerSymbol.asClassOrModuleRef();
         if (oldDefHash.owner.isTypeTemplate) {
+            // Also have to delete the static-field-class-alias that forwards from a constant
+            // literal on the attached class to the type template on the singleton class
+            deleteSymbolViaFullNameHash(ctx, owner, oldDefHash.nameHash);
+
             owner = owner.data(ctx)->singletonClass(ctx);
         }
 
